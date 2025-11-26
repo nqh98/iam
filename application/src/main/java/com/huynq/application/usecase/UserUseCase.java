@@ -4,16 +4,12 @@ import com.huynq.application.dto.CreateUserRequest;
 import com.huynq.iam.core.domain.entity.UserEntity;
 import com.huynq.iam.core.domain.exception.BusinessException;
 import com.huynq.iam.core.domain.service.IdentityService;
-import com.huynq.iam.core.domain.service.PasswordService;
-import com.huynq.iam.core.domain.valueobject.Password;
 
 public class UserUseCase {
     private final IdentityService identityService;
-    private final PasswordService passwordService;
 
-    public UserUseCase(IdentityService identityService, PasswordService passwordService) {
+    public UserUseCase(IdentityService identityService) {
         this.identityService = identityService;
-        this.passwordService = passwordService;
     }
 
     /**
@@ -23,11 +19,7 @@ public class UserUseCase {
      * @return the created user
      */
     public UserEntity createUser(CreateUserRequest request) throws BusinessException {
-        // Hash the password using BCrypt before creating the Password value object
-        String hashedPassword = passwordService.encode(request.getPassword());
-        Password password = Password.fromHashed(hashedPassword);
-
-        return identityService.createUser(password, request.getExternalId());
+        return identityService.createUser(request.getPassword(), request.getExternalId());
     }
 
     /**
@@ -60,9 +52,7 @@ public class UserUseCase {
      * @param newPassword the new password
      */
     public void changePassword(Long userId, String oldPassword, String newPassword) throws BusinessException {
-        Password oldPwd = Password.of(oldPassword);
-        Password newPwd = Password.of(newPassword);
-
-        identityService.changePassword(userId, oldPwd, newPwd);
+        identityService.changePassword(userId, oldPassword, newPassword);
+        //TODO revoke all token
     }
 }

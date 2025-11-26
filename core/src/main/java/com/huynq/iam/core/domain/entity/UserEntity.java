@@ -2,9 +2,7 @@ package com.huynq.iam.core.domain.entity;
 
 
 import com.huynq.iam.core.domain.entity.record.User;
-import com.huynq.iam.core.domain.valueobject.Password;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -15,7 +13,7 @@ import java.util.Set;
  */
 public class UserEntity {
     private final Long id;
-    private final Password password;
+    private final String password;
     private final Long createdAt;
     private final Long updatedAt;
     private final Set<Long> roleIds;
@@ -36,7 +34,7 @@ public class UserEntity {
         return id;
     }
 
-    public Password getPassword() {
+    public String getPassword() {
         return password;
     }
 
@@ -82,7 +80,7 @@ public class UserEntity {
         return new UserEntity(updatedUser);
     }
 
-    public UserEntity withPassword(Password newPassword) {
+    public UserEntity withPassword(String newPassword) {
         User updatedUser = User.builder()
                 .from(this.toRecord())
                 .setPassword(newPassword)

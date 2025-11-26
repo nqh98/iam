@@ -7,7 +7,7 @@ import com.huynq.iam.core.domain.exception.BusinessException;
 import com.huynq.iam.core.domain.repository.RoleRepository;
 import com.huynq.iam.core.domain.repository.UserRepository;
 import com.huynq.iam.core.domain.service.IdentityService;
-import com.huynq.iam.core.domain.valueobject.Password;
+import com.huynq.iam.core.domain.service.PasswordService;
 import com.huynq.snowid.SnowflakeIdGenerator;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,17 +15,21 @@ public class IdentityServiceImpl implements IdentityService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final SnowflakeIdGenerator snowflakeIdGenerator;
+    private final PasswordService passwordService;
 
-    public IdentityServiceImpl(UserRepository userRepository, RoleRepository roleRepository,
-                               SnowflakeIdGenerator snowflakeIdGenerator) {
+    public IdentityServiceImpl(UserRepository userRepository,
+                               RoleRepository roleRepository,
+                               SnowflakeIdGenerator snowflakeIdGenerator,
+                               PasswordService passwordService) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.snowflakeIdGenerator = snowflakeIdGenerator;
+        this.passwordService = passwordService;
     }
 
     @Override
     @Transactional
-    public UserEntity createUser(Password password, String externalId) throws BusinessException {
+    public UserEntity createUser(String password, String externalId) throws BusinessException {
         if (userRepository.existsByExternalId(externalId)) {
             throw new BusinessException(
                     ErrorCode.EXTERNAL_ID_EXISTS.getCode(),
@@ -33,12 +37,13 @@ public class IdentityServiceImpl implements IdentityService {
             );
         }
 
-        // Create user with generated ID
+        // Create user with generated ID and encoded password
+        String encodedPassword = passwordService.encode(password);
         long userId = snowflakeIdGenerator.nextId();
         long currentTimeMillis = System.currentTimeMillis();
         User userRecord = User.builder()
                 .setId(userId)
-                .setPassword(password)
+                .setPassword(encodedPassword)
                 .setExternalId(externalId)
                 .setCreatedAt(currentTimeMillis)
                 .setUpdatedAt(currentTimeMillis)
@@ -92,14 +97,14 @@ public class IdentityServiceImpl implements IdentityService {
 
     @Override
     @Transactional
-    public void changePassword(long userId, Password oldPwd, Password newPwd) throws BusinessException {
+    public void changePassword(long userId, String oldPwd, String newPwd) throws BusinessException {
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new BusinessException(
                 ErrorCode.USER_NOT_FOUND.getCode(),
                 ErrorCode.USER_NOT_FOUND.getDefaultMessage()
         ));
 
-        // Verify old password matches current password
-        if (!user.getPassword().equals(oldPwd)) {
+        // Verify old password matches current password using PasswordService
+        if (!passwordService.matches(oldPwd, user.getPassword())) {
             throw new BusinessException(
                     ErrorCode.INVALID_OLD_PASSWORD.getCode(),
                     ErrorCode.INVALID_OLD_PASSWORD.getDefaultMessage()
@@ -107,7 +112,8 @@ public class IdentityServiceImpl implements IdentityService {
         }
 
         // Update password and persist
-        UserEntity updated = user.withPassword(newPwd);
+        String encodedNewPassword = passwordService.encode(newPwd);
+        UserEntity updated = user.withPassword(encodedNewPassword);
         userRepository.save(updated);
     }
 }

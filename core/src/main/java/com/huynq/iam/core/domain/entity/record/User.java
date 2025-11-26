@@ -1,13 +1,11 @@
 package com.huynq.iam.core.domain.entity.record;
 
 
-import com.huynq.iam.core.domain.valueobject.Password;
-
 import java.util.Set;
 
 public record User(
         Long id,
-        Password password,
+        String password,
         Long createdAt,
         Long updatedAt,
         Set<Long> roleIds,
@@ -15,7 +13,7 @@ public record User(
 ) {
     public static class Builder {
         private Long id;
-        private Password password;
+        private String password;
         private Long createdAt;
         private Long updatedAt;
         private Set<Long> roleIds = Set.of();
@@ -26,7 +24,7 @@ public record User(
             return this;
         }
 
-        public Builder setPassword(Password password) {
+        public Builder setPassword(String password) {
             this.password = password;
             return this;
         }
