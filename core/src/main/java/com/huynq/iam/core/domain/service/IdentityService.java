@@ -16,7 +16,7 @@ public interface IdentityService {
 
     UserEntity assignRole(long userId, long roleId) throws BusinessException;
 
-    UserEntity removeRole(long userId, long roleId);
+    UserEntity removeRole(long userId, long roleId) throws BusinessException;
 
     boolean changePassword(long userId, Password oldPwd, Password newPwd);
 }

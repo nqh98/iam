@@ -74,8 +74,20 @@ public class IdentityServiceImpl implements IdentityService {
 
     @Override
     @Transactional
-    public UserEntity removeRole(long userId, long roleId) {
-        return null;
+    public UserEntity removeRole(long userId, long roleId) throws BusinessException {
+        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new BusinessException(
+                ErrorCode.USER_NOT_FOUND.getCode(),
+                ErrorCode.USER_NOT_FOUND.getDefaultMessage()
+        ));
+
+        // If the user doesn't have the role, no change is needed
+        if (!user.hasRole(roleId)) {
+            return user;
+        }
+
+        // Remove the role and persist the updated user
+        UserEntity updated = user.withoutRole(roleId);
+        return userRepository.save(updated);
     }
 
     @Override
