@@ -18,5 +18,5 @@ public interface IdentityService {
 
     UserEntity removeRole(long userId, long roleId) throws BusinessException;
 
-    boolean changePassword(long userId, Password oldPwd, Password newPwd);
+    void changePassword(long userId, Password oldPwd, Password newPwd) throws BusinessException;
 }

@@ -48,7 +48,7 @@ public class UserUseCase {
      * @param roleId the role ID
      * @return the updated user
      */
-    public UserEntity removeRole(Long userId, Long roleId) {
+    public UserEntity removeRole(Long userId, Long roleId) throws BusinessException {
         return identityService.removeRole(userId, roleId);
     }
 
@@ -58,12 +58,11 @@ public class UserUseCase {
      * @param userId the user ID
      * @param oldPassword the old password
      * @param newPassword the new password
-     * @return true if password was changed successfully
      */
-    public boolean changePassword(Long userId, String oldPassword, String newPassword) {
+    public void changePassword(Long userId, String oldPassword, String newPassword) throws BusinessException {
         Password oldPwd = Password.of(oldPassword);
         Password newPwd = Password.of(newPassword);
 
-        return identityService.changePassword(userId, oldPwd, newPwd);
+        identityService.changePassword(userId, oldPwd, newPwd);
     }
 }

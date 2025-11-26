@@ -3,7 +3,8 @@ package com.huynq.iam.core.domain.enums;
 public enum ErrorCode {
     USER_NOT_FOUND(-1001, "User not found"),
     ROLE_NOT_FOUND(-1002, "Role not found"),
-    EXTERNAL_ID_EXISTS(-1003, "User with external id already exists");
+    EXTERNAL_ID_EXISTS(-1003, "User with external id already exists"),
+    INVALID_OLD_PASSWORD(-1004, "Old password does not match current password");
 
     private final int code;
     private final String defaultMessage;

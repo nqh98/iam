@@ -92,7 +92,22 @@ public class IdentityServiceImpl implements IdentityService {
 
     @Override
     @Transactional
-    public boolean changePassword(long userId, Password oldPwd, Password newPwd) {
-        return false;
+    public void changePassword(long userId, Password oldPwd, Password newPwd) throws BusinessException {
+        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new BusinessException(
+                ErrorCode.USER_NOT_FOUND.getCode(),
+                ErrorCode.USER_NOT_FOUND.getDefaultMessage()
+        ));
+
+        // Verify old password matches current password
+        if (!user.getPassword().equals(oldPwd)) {
+            throw new BusinessException(
+                    ErrorCode.INVALID_OLD_PASSWORD.getCode(),
+                    ErrorCode.INVALID_OLD_PASSWORD.getDefaultMessage()
+            );
+        }
+
+        // Update password and persist
+        UserEntity updated = user.withPassword(newPwd);
+        userRepository.save(updated);
     }
 }
