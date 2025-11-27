@@ -6,24 +6,24 @@ import com.huynq.iam.core.domain.enums.ErrorCode;
 import com.huynq.iam.core.domain.exception.BusinessException;
 import com.huynq.iam.core.domain.repository.RoleRepository;
 import com.huynq.iam.core.domain.repository.UserRepository;
+import com.huynq.iam.core.domain.service.IdGenerator;
 import com.huynq.iam.core.domain.service.IdentityService;
 import com.huynq.iam.core.domain.service.PasswordService;
-import com.huynq.snowid.SnowflakeIdGenerator;
 import org.springframework.transaction.annotation.Transactional;
 
 public class IdentityServiceImpl implements IdentityService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
-    private final SnowflakeIdGenerator snowflakeIdGenerator;
+    private final IdGenerator idGenerator;
     private final PasswordService passwordService;
 
     public IdentityServiceImpl(UserRepository userRepository,
                                RoleRepository roleRepository,
-                               SnowflakeIdGenerator snowflakeIdGenerator,
+                               IdGenerator idGenerator,
                                PasswordService passwordService) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
-        this.snowflakeIdGenerator = snowflakeIdGenerator;
+        this.idGenerator = idGenerator;
         this.passwordService = passwordService;
     }
 
@@ -39,7 +39,7 @@ public class IdentityServiceImpl implements IdentityService {
 
         // Create user with generated ID and encoded password
         String encodedPassword = passwordService.encode(password);
-        long userId = snowflakeIdGenerator.nextId();
+        long userId = idGenerator.nextId();
         long currentTimeMillis = System.currentTimeMillis();
         User userRecord = User.builder()
                 .setId(userId)
@@ -63,7 +63,10 @@ public class IdentityServiceImpl implements IdentityService {
         ));
 
         if (user.hasRole(roleId)) {
-            return user; // No change needed
+            throw new BusinessException(
+                    ErrorCode.ROLE_ALREADY_ASSIGNED.getCode(),
+                    ErrorCode.ROLE_ALREADY_ASSIGNED.getDefaultMessage()
+            );
         }
 
         if (!roleRepository.existsById(roleId)) {
@@ -87,7 +90,10 @@ public class IdentityServiceImpl implements IdentityService {
 
         // If the user doesn't have the role, no change is needed
         if (!user.hasRole(roleId)) {
-            return user;
+            throw new BusinessException(
+                    ErrorCode.ROLE_NOT_ASSIGNED.getCode(),
+                    ErrorCode.ROLE_NOT_ASSIGNED.getDefaultMessage()
+            );
         }
 
         // Remove the role and persist the updated user
@@ -115,5 +121,37 @@ public class IdentityServiceImpl implements IdentityService {
         String encodedNewPassword = passwordService.encode(newPwd);
         UserEntity updated = user.withPassword(encodedNewPassword);
         userRepository.save(updated);
+    }
+
+    @Override
+    @Transactional
+    public UserEntity updateExternalId(long userId, String newExternalId) throws BusinessException {
+        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new BusinessException(
+                ErrorCode.USER_NOT_FOUND.getCode(),
+                ErrorCode.USER_NOT_FOUND.getDefaultMessage()
+        ));
+
+        if (!user.getExternalId().equalsIgnoreCase(newExternalId)
+                && userRepository.existsByExternalId(newExternalId)) {
+            throw new BusinessException(
+                    ErrorCode.EXTERNAL_ID_EXISTS.getCode(),
+                    ErrorCode.EXTERNAL_ID_EXISTS.getDefaultMessage()
+            );
+        }
+
+        UserEntity updated = user.withExternalId(newExternalId);
+        return userRepository.save(updated);
+    }
+
+    @Override
+    @Transactional
+    public void deleteUser(long userId) throws BusinessException {
+        if (!userRepository.existsById(userId)) {
+            throw new BusinessException(
+                    ErrorCode.USER_NOT_FOUND.getCode(),
+                    ErrorCode.USER_NOT_FOUND.getDefaultMessage()
+            );
+        }
+        userRepository.deleteById(userId);
     }
 }

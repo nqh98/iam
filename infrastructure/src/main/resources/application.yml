@@ -1,0 +1,21 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/iam
+    username: iam
+    password: changeme
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: true
+
+app:
+  node-id: 1
+  jwt:
+    secret: "dGhpc19pc19hX3NhZmVfYmFzZTY0X3NlY3JldF9rZXk="
+    issuer: "iam-service"
+    access-token-expiration: 900000   # 15 minutes
+    refresh-token-expiration: 604800000 # 7 days
+

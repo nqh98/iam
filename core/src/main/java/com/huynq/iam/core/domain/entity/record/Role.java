@@ -21,7 +21,7 @@ public record Role(
         private boolean active;
         private Long createdAt;
         private Long updatedAt;
-        private Set<PermissionEntity> permissionEntities;
+        private Set<PermissionEntity> permissionEntities = Set.of();
 
         public Builder setId(Long id) {
             this.id = id;
@@ -54,7 +54,7 @@ public record Role(
         }
 
         public Builder setPermissions(Set<PermissionEntity> permissionEntities) {
-            this.permissionEntities = permissionEntities;
+            this.permissionEntities = permissionEntities == null ? Set.of() : Set.copyOf(permissionEntities);
             return this;
         }
 

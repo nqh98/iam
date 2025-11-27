@@ -14,7 +14,6 @@
 
     <properties>
         <uuid.creator.version>6.1.1</uuid.creator.version>
-        <snowid.version>1.0-SNAPSHOT</snowid.version>
     </properties>
 
     <dependencies>
@@ -23,20 +22,24 @@
             <artifactId>core</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.huynq.iam.application</groupId>
+            <artifactId>application</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.github.f4b6a3</groupId>
             <artifactId>uuid-creator</artifactId>
             <version>${uuid.creator.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.huynq</groupId>
-            <artifactId>snowid</artifactId>
-            <version>${snowid.version}</version>
         </dependency>
 
         <!-- Spring Boot Security -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
         <dependency>
@@ -46,6 +49,25 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- JWT Dependencies -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>0.12.3</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>0.12.3</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>0.12.3</version>
             <scope>runtime</scope>
         </dependency>
     </dependencies>

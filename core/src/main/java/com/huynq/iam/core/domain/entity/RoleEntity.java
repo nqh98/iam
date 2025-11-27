@@ -118,6 +118,25 @@ public class RoleEntity {
         return new RoleEntity(updatedRole);
     }
 
+    public RoleEntity withName(String newName) {
+        Role updatedRole = Role.builder()
+                .from(this.toRecord())
+                .setName(newName)
+                .setUpdatedAt(System.currentTimeMillis())
+                .build();
+        return new RoleEntity(updatedRole);
+    }
+
+    public RoleEntity withPermissions(Set<PermissionEntity> permissions) {
+        Set<PermissionEntity> copy = permissions == null ? Set.of() : Set.copyOf(permissions);
+        Role updatedRole = Role.builder()
+                .from(this.toRecord())
+                .setPermissions(copy)
+                .setUpdatedAt(System.currentTimeMillis())
+                .build();
+        return new RoleEntity(updatedRole);
+    }
+
     /**
      * Converts this entity to a Role record for data transfer.
      *

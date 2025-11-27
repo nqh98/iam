@@ -118,6 +118,21 @@ public class PermissionEntity {
     }
 
     /**
+     * Returns the canonical OAuth2 scope representation (resource:action).
+     */
+    public String asScope() {
+        if (this.name != null && !this.name.isBlank()) {
+            return this.name;
+        }
+        String normalizedResource = this.resource == null ? "" : this.resource.trim();
+        String normalizedAction = this.action == null ? "" : this.action.trim();
+        if (normalizedResource.isEmpty() && normalizedAction.isEmpty()) {
+            return "";
+        }
+        return normalizedResource + ":" + normalizedAction;
+    }
+
+    /**
      * Converts this entity to a Permission record for data transfer.
      *
      * @return a Permission record representing this entity's data

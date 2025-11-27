@@ -18,4 +18,8 @@ public interface IdentityService {
     UserEntity removeRole(long userId, long roleId) throws BusinessException;
 
     void changePassword(long userId, String oldPwd, String newPwd) throws BusinessException;
+
+    UserEntity updateExternalId(long userId, String newExternalId) throws BusinessException;
+
+    void deleteUser(long userId) throws BusinessException;
 }

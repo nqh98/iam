@@ -5,31 +5,27 @@ import com.huynq.iam.core.domain.enums.ErrorCode;
 import com.huynq.iam.core.domain.exception.BusinessException;
 import com.huynq.iam.core.domain.repository.UserRepository;
 import com.huynq.iam.core.domain.service.AuthenticationService;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import com.huynq.iam.core.domain.service.PasswordService;
 
 public class AuthenticationServiceImpl implements AuthenticationService {
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final PasswordService passwordService;
 
-    public AuthenticationServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public AuthenticationServiceImpl(UserRepository userRepository, PasswordService passwordService) {
         this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
+        this.passwordService = passwordService;
     }
 
     @Override
-    public UserEntity authenticate(long id, String password) throws BusinessException {
-        // Find user by id
-        UserEntity user = userRepository.findById(id).orElseThrow(() ->
+    public UserEntity authenticate(String externalId, String password) throws BusinessException {
+        UserEntity user = userRepository.findByExternalId(externalId).orElseThrow(() ->
                 new BusinessException(
                         ErrorCode.INVALID_CREDENTIALS.getCode(),
                         ErrorCode.INVALID_CREDENTIALS.getDefaultMessage()
                 )
         );
 
-        // Check password using PasswordEncoder against stored hash
-        boolean matches = passwordEncoder.matches(password, user.getPassword());
-
-        if (!matches) {
+        if (!passwordService.matches(password, user.getPassword())) {
             throw new BusinessException(
                     ErrorCode.INVALID_CREDENTIALS.getCode(),
                     ErrorCode.INVALID_CREDENTIALS.getDefaultMessage()

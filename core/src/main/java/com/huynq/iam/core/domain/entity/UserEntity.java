@@ -89,6 +89,15 @@ public class UserEntity {
         return new UserEntity(updatedUser);
     }
 
+    public UserEntity withExternalId(String newExternalId) {
+        User updatedUser = User.builder()
+                .from(this.toRecord())
+                .setExternalId(newExternalId)
+                .setUpdatedAt(System.currentTimeMillis())
+                .build();
+        return new UserEntity(updatedUser);
+    }
+
     public boolean hasRole(Long roleId) {
         return this.roleIds.contains(roleId);
     }
